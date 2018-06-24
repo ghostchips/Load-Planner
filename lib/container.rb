@@ -1,4 +1,4 @@
-require_relative 'box'
+require_relative 'lib'
 
 class Container
   
@@ -11,12 +11,12 @@ class Container
     @height = opts[:height]
     @floor_area = @length * @width
     @total_volume = @floor_area * @height
-    @boxes = []
+    @boxes = BoxArray.new
   end
   
   def add_box(*new_boxes)
     container_boxes = new_boxes.select(&:is_box?)
-    self.boxes = [*boxes, *container_boxes]
+    self.boxes = BoxArray.new(*boxes, *container_boxes)
   end
   
   def sort_boxes_by(attribute_call)
