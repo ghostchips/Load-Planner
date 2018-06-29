@@ -1,4 +1,6 @@
-require_relative 'box'
-require_relative 'container'
 require_relative 'loader'
-require_relative 'box_array'
+require_relative 'carrier/carrier'
+
+class Object
+  alias_method :then, :yield_self
+end
