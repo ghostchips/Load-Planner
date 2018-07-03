@@ -11,15 +11,15 @@ module Carrier
     end
 
     def sort_by_origin(address, container_properties, attributes=nil)
-      sorted_packages = 
+      sorted_packages =
         build_route(address, *address_list)
         .then { |route| sort_by_route(route) }
         .then { |packages| sort_by_properties(packages)}
-      self.clear 
+      self.clear
       sorted_packages.each { |package| self << package }
     end
 
-    def sort_by_route(route, attributes=nil)
+    def sort_by_route(route)
       route.flat_map do |rt|
         self.select { |package| package.destination == rt['destination'] }
       end
@@ -33,7 +33,7 @@ module Carrier
         end.reverse
       end
     end
-    
+
     def address_list
       self.group_by { |package| package.destination }.keys
     end

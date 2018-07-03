@@ -5,48 +5,52 @@ require 'dotenv'
 
 module Carrier
   module RouteBuilder
-    
+
     def build_route(origin, *address_list)
-      build_request([origin, *address_list])
-      .then { |data| make_request(data) }
-      .then { |data| transform_response(data) }
-      .then { |data| sort_by_distance(data) }
+      addresses, pairs = build_addresses([origin, *address_list])
+      addresses
+      .then { |addrs| build_request(addrs)}
+      .then { |params| make_request(params) }
+      .then { |response| transform_response(response, pairs) }
+      .then { |data| sort_by_distance(data, origin, addresses) }
     end
-    
+
     private
     # \https://maps.googleapis.com/maps/api/distancematrix/json\?origins\=Vancouver+BC\|Seattle\&destinations\=San+Francisco\|Victoria+BC\&key\=
-    
-    def build_request(addresses)
-      origins, destinations, api_key, address_pairs = build_params(addresses)
 
-      { address_list: { origin: addresses.first, all: addresses, pairs: address_pairs }, 
-        params: { origins: origins, destinations: destinations, key: api_key } }
+    def build_addresses(addresses)
+      pairs = addresses.flat_map do |a2|
+        addresses.map { |a3| { 'origin' => a2, 'destination' => a3 } }
+      end
+      [addresses, pairs]
     end
-    
-    def make_request(data={})
-      response = Faraday.new.get 'https://maps.googleapis.com/maps/api/distancematrix/json', data[:params]
-      
-      { address_list: data[:address_list], response: JSON.parse(response.body) }
+
+    def build_request(addresses)
+      formatted_addresses = addresses.map { |address| address.gsub(', ', '+')  }.join('|')
+
+      { origins: formatted_addresses, destinations: formatted_addresses, key: ENV['MAPS_API'] }
     end
-    
-    def transform_response(data={})
-      transformed_response = 
-        get_rows(data[:response])
-        .then { |response| merge_addresses(response, data[:address_list][:pairs]) }
-        .then { |response| remove_invalid_combinations(response)}
-        
-      { address_list: data[:address_list], transformed_response: transformed_response }
+
+    def make_request(params)
+      response = Faraday.new.get 'https://maps.googleapis.com/maps/api/distancematrix/json', params
+      JSON.parse(response.body)
     end
-    
-    def sort_by_distance(data={})
-      new_data, leg = next_leg(data[:transformed_response], data[:address_list][:origin])
-      (0..data[:address_list][:all].length).reduce([leg]) do |trip, _|
+
+    def transform_response(response, pairs)
+      get_rows(response)
+      .then { |resp| merge_addresses(resp, pairs) }
+      .then { |addr| remove_invalid_combinations(addr)}
+    end
+
+    def sort_by_distance(data, origin, addresses)
+      new_data, leg = next_leg(data, origin)
+      (0..addresses.length).reduce([leg]) do |trip, _|
         next_destination = trip.last&.fetch('destination')
         new_data, leg = next_leg(new_data, next_destination)
         leg ? trip << leg : trip
       end
     end
-    
+
     def next_leg(data, address)
       return unless address
       address_legs, new_data = data.partition do |a|
@@ -57,28 +61,20 @@ module Carrier
       end
       [new_data, next_leg]
     end
-    
+
     # HELPERS
-    
-    def build_params(addresses)
-      address_pairs = addresses.flat_map do |a2|
-        addresses.map { |a3| { 'origin' => a2, 'destination' => a3 } }
-      end
-      formatted_addresses = addresses.map { |address| address.gsub(', ', '+')  }.join('|')
-      [formatted_addresses, formatted_addresses, ENV['MAPS_API'], address_pairs]
-    end
-    
+
     def get_rows(response)
       response["rows"].flat_map { |row| row["elements"] }
     end
-    
+
     def merge_addresses(rows, pairs)
       rows.map.with_index { |run, index| pairs[index].merge(run) }
     end
-    
+
     def remove_invalid_combinations(data)
       data.reject { |c| c['origin'] == c['destination']}
     end
-    
+
   end
 end

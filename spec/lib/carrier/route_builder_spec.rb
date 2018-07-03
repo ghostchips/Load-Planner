@@ -11,7 +11,7 @@ describe Carrier::RouteBuilder do
   let(:address_list) do
     ['Ringwood, VIC, Australia', 'Belgrave, VIC, Australia', 'Boronia, VIC, Australia']
   end
-  
+
   before do
     allow(Faraday).to receive_message_chain(:new, :get).with(any_args) { api_response}
   end
@@ -30,7 +30,7 @@ describe Carrier::RouteBuilder do
    end
 
    let(:api_response) do
-     double('response', body: 
+     double('response', body:
        {
          "destination_addresses"=>[
            "Melbourne VIC, Australia",

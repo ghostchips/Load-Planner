@@ -14,7 +14,7 @@ describe Carrier::Content do
   let(:packages) do
     [package4, package6, package5, package3, package1, package2]
    end
-   
+
   before do
     allow(subject).to receive(:build_route).with(any_args) { route }
   end
@@ -37,7 +37,7 @@ describe Carrier::Content do
       "status"=>"OK"}
     ]
    end
-   
+
    let(:sorted_packages) do
      [package1, package2, package3, package4, package5, package6]
    end
