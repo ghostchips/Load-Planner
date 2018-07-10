@@ -11,13 +11,14 @@ module Carrier
       super([*packages])
     end
 
-    def sort_by_origin(address, container_properties, attributes=nil)
+    def sort_by_origin(address, container_properties=nil)
       sorted_packages =
         build_route(address, *address_list)
         .then { |route| sort_by_route(route) }
         .then { |packages| sort_by_properties(packages)}
       self.clear
       sorted_packages.each { |package| self << package }
+      self.reverse
     end
 
     def sort_by_route(route)
@@ -31,7 +32,7 @@ module Carrier
       grouped_packages.flat_map do |_, packs|
         packs.sort_by do |pack|
           [pack.properties.weight, pack.properties.volume]
-        end.reverse
+        end
       end
     end
 

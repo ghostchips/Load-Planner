@@ -6,12 +6,12 @@ describe Carrier::Content do
   subject { Carrier::Content.new }
 
   let(:origin) { 'Melbourne, VIC, Australia'}
-  let(:package1) { Carrier::Package.new(length: 5, width: 2, height: 2, weight: 3, destination: 'Ringwood, VIC, Australia') }
-  let(:package2) { Carrier::Package.new(length: 5, width: 1, height: 3, weight: 2, destination: 'Ringwood, VIC, Australia') }
+  let(:package1) { Carrier::Package.new(length: 5, width: 1, height: 3, weight: 2, destination: 'Ringwood, VIC, Australia') }
+  let(:package2) { Carrier::Package.new(length: 5, width: 2, height: 2, weight: 3, destination: 'Ringwood, VIC, Australia') }
   let(:package3) { Carrier::Package.new(length: 1, width: 3, height: 2, weight: 2, destination: 'Boronia, VIC, Australia') }
-  let(:package4) { Carrier::Package.new(length: 1, width: 5, height: 5, weight: 5, destination: 'Belgrave, VIC, Australia') }
   let(:package5) { Carrier::Package.new(length: 5, width: 2, height: 1, weight: 3, destination: 'Belgrave, VIC, Australia') }
-  let(:package6) { Carrier::Package.new(length: 3, width: 2, height: 1, weight: 3, destination: 'Belgrave, VIC, Australia') }
+  let(:package4) { Carrier::Package.new(length: 3, width: 2, height: 1, weight: 3, destination: 'Belgrave, VIC, Australia') }
+  let(:package6) { Carrier::Package.new(length: 1, width: 5, height: 5, weight: 5, destination: 'Belgrave, VIC, Australia') }
   let(:packages) do
     [package4, package6, package5, package3, package1, package2]
    end
@@ -27,7 +27,7 @@ describe Carrier::Content do
 
   context '#sort_by_origin' do
     subject { Carrier::Content.new(*packages)}
-    it { expect(subject.sort_by_origin(origin, [])).to eq sorted_packages}
+    it { expect(subject.sort_by_origin(origin)).to eq sorted_packages}
   end
 
   let(:route) do
@@ -40,7 +40,7 @@ describe Carrier::Content do
    end
 
    let(:sorted_packages) do
-     [package1, package2, package3, package4, package5, package6]
+     [package6, package5, package4, package3, package2, package1]
    end
 
 end
