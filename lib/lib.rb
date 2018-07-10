@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'loader'
 require_relative 'carrier/carrier'
 

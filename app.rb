@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'lib/lib'
 
 c = Carrier::Container.new(length: 5, width: 4, height: 6, capacity: 200)
