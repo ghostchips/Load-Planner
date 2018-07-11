@@ -13,7 +13,7 @@ module Carrier
       @content = Carrier::Content.new
     end
 
-    def add_package(*new_packages)
+    def add_packages(*new_packages)
       valid_packages = new_packages.select(&:is_package?)
       self.content = Carrier::Content.new(*content, *valid_packages)
     end
